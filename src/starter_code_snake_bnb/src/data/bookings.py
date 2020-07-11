@@ -11,5 +11,5 @@ class Booking:
 
     meta = {
         'db_alias': 'core',
-        'meta': 'cages'
+        'collection': 'cages'
     }
