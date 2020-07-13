@@ -190,6 +190,7 @@ def list_cages(suppress_header=False):
 
 
 def update_availability():
+    # TODO: Add sanity check. No overlapping availability for a given cage.
     print(' ****************** Add available date **************** ')
 
     # Done: Require an account
