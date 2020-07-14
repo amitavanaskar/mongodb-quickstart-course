@@ -239,6 +239,16 @@ def update_availability():
         error_msg('INCORRECT INPUT - Please input number of days [Eg. 1, 2, 3, etc]')
         update_availability()
 
+    availability_conflict = svc.check_availability_conflict(selected_cage, start_date, days)
+    if availability_conflict:
+        error_msg('INCORRECT INPUT - This cage has already been marked available for the duration (or part duration) '
+                  'mentioned.')
+        update_again = input('Try updating cage availability with different inputs [y / n]? ').lower().startswith('y')
+        if update_again:
+            update_availability()
+        else:
+            return
+
     svc.add_available_date(
         selected_cage, start_date, days
     )

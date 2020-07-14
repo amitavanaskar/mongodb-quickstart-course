@@ -13,6 +13,8 @@ class Booking(mongoengine.EmbeddedDocument):
     review = mongoengine.StringField()
     rating = mongoengine.IntField(default=0)    # Can ask to rate from 1-5, filter out the zeroes for avg (not rated)
 
+    cancel_flag = mongoengine.BooleanField(default=False)   # Used to cancel a booking availability
+
     # meta = {
     #     'db_alias': 'core',
     #     'collection': 'cages'

@@ -3,6 +3,7 @@ import datetime
 import dateutil
 from dateutil import parser
 
+from data.bookings import Booking
 from data.snakes import Snake
 from infrastructure.switchlang import switch
 import program_hosts as hosts
@@ -127,7 +128,7 @@ def book_a_cage():
         print('You need to login to book a cage.')
         hosts.log_into_account()
 
-    # TODO: Verify they have a snake
+    # Done: Verify they have a snake
     snakes = svc.find_snakes_for_user(state.active_account)
     if not snakes:
         hosts.error_msg('You must first add a snake to book a cage.')
@@ -228,7 +229,12 @@ def book_a_cage():
 
 def view_bookings():
     print(' ****************** Your bookings **************** ')
-    # TODO: Require an account
-    # TODO: List booking info along with snake info
+    # Done: Require an account
+    if not state.active_account:
+        hosts.error_msg('You need to login to view your bookings')
+        hosts.log_into_account()
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    # TODO: List booking info along with snake info
+    bookings = svc.get_bookings_for_user(state.active_account)
+
+    # print(" -------- NOT IMPLEMENTED -------- ")

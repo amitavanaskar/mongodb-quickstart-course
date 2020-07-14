@@ -96,12 +96,12 @@ def get_available_cages(checkin: datetime.datetime, checkout: datetime.datetime,
     # TODO: Minimum size of cage is snake length / 4
     # TODO: Find all the cages that have bookings but are not booked in the specified time block
     # TODO: If venomous, only allowed. If not, all
-    # snake = Snake.objects(id=snake)
     min_size = snake.length / 4
     query = Cage.objects() \
         .filter(square_meters__gte=min_size) \
         .filter(bookings__check_in_date__lte=checkin) \
-        .filter(bookings__check_out_date__gte=checkout)
+        .filter(bookings__check_out_date__gte=checkout) \
+        .filter(bookings__cancel_flag=False)
     # Issue in the above query. Mongoengine does not by default do an element match. As in it does not check that the
     # same booking availability has both available checkin date before the checkin date and available booking checkout
     # date after the checkout date. This is possible to do in PyMongo with $elematch (element match). Therefore the
@@ -118,7 +118,10 @@ def get_available_cages(checkin: datetime.datetime, checkout: datetime.datetime,
     for c in cages:
         b: Booking
         for b in c.bookings:
-            if b.check_in_date <= checkin and b.check_out_date >= checkout and b.guest_snake_id is None:
+            if b.check_in_date <= checkin \
+                    and b.check_out_date >= checkout \
+                    and b.guest_snake_id is None \
+                    and not b.cancel_flag:
                 final_cages.append(c)
 
     return final_cages
@@ -127,22 +130,26 @@ def get_available_cages(checkin: datetime.datetime, checkout: datetime.datetime,
 def book_cage(account: Owner, snake: Snake, cage: Cage, checkin: datetime.datetime, checkout: datetime.datetime):
     # Done: Update booking availability - Split.
     #  Available checkin to Booked Checkin,
-    #  Booked Checkin to Booked Checkout #NOT NEEDED#,
+    #  Booked Checkin to Booked Checkout,
     #  Booked Checkout to Available checkout
     # Done: The duration of this booking should be updated to booked, with guest and snake id updated against booking
 
-    # cage = Cage.objects(id=cage.id)  # Refresh cage data
     available_booking_chosen: Booking = None
     initial_available_booking_list = cage.bookings
+    b: Booking
     for b in initial_available_booking_list:
-        if b.check_in_date <= checkin and b.check_out_date >= checkout and b.guest_snake_id is None:
+        if b.check_in_date <= checkin \
+                and b.check_out_date >= checkout \
+                and b.guest_snake_id is None \
+                and not b.cancel_flag:
             available_booking_chosen = b
             break
 
-    # available_checkin = available_booking_chosen.check_in_date
-    # available_checkout = available_booking_chosen.check_out_date
-    # Above to be used for creating new available bookings once sanity added.
+    # Update cancel flag if the availability is greater than chosen booking
+    if available_booking_chosen.check_in_date < checkin or available_booking_chosen.check_out_date > checkout:
+        available_booking_chosen.cancel_flag = True
 
+    # Create 3 new bookings. Prior, Post, and current booking.
     if available_booking_chosen.check_in_date < checkin:
         new_prior_booking = add_available_date(
             cage=cage,
@@ -155,8 +162,38 @@ def book_cage(account: Owner, snake: Snake, cage: Cage, checkin: datetime.dateti
             start_date=checkout,
             days=(available_booking_chosen.check_out_date - checkout).days
         )
-    available_booking_chosen.booked_date = datetime.datetime.now()
-    available_booking_chosen.guest_snake_id = snake.id
-    available_booking_chosen.guest_owner_id = account.id
+    new_current_booking = add_available_date(
+        cage=cage,
+        start_date=checkin,
+        days=(checkout - checkin).days
+    )
+
+    # Update current booking
+    new_current_booking.booked_date = datetime.datetime.now()
+    new_current_booking.guest_snake_id = snake.id
+    new_current_booking.guest_owner_id = account.id
 
     cage.save()
+
+
+def check_availability_conflict(cage: Cage, start_date: datetime, days: int):
+    conflict = False
+    end_date = start_date + datetime.timedelta(days=days)
+    bookings = cage.bookings
+    for b in bookings:
+        if b.check_in_date < start_date or b.check_out_date > end_date:
+            conflict = True
+            break
+    return conflict
+
+
+def get_bookings_for_user(account: Owner) -> List[Booking]:
+    booked_cages = Cage.objects().filter(bookings__guest_owner_id=account.id).only('bookings', 'name')
+    # Only returns only those values specified. Here cage bookings and cage name.
+    bookings = []
+    for cage in booked_cages:
+        for booking in cage.bookings:
+            if cage.booking.guest_owner_id == account.id:
+                bookings.append(booking)
+    return bookings
+    # TODO: Test above
