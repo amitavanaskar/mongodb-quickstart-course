@@ -190,7 +190,7 @@ def list_cages(suppress_header=False):
 
 
 def update_availability():
-    # TODO: Add sanity check. No overlapping availability for a given cage.
+    # Done: Add sanity check. No overlapping availability for a given cage.
     print(' ****************** Add available date **************** ')
 
     # Done: Require an account
@@ -261,11 +261,24 @@ def update_availability():
 def view_bookings():
     print(' ****************** Your bookings **************** ')
 
-    # TODO: Require an account
-    # TODO: Get cages, and nested bookings as flat list
-    # TODO: Print details for each
+    # Done: Require an account
+    if not state.active_account:
+        error_msg('You need to login to view your bookings')
+        log_into_account()
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    # Done: Get cages, and nested bookings as flat list
+    reserved_bookings = svc.get_bookings_for_host(state.active_account)
+
+    # Done: Print details for each
+    print(f'Your cages have {len(reserved_bookings)} bookings -')
+    for idx, b in enumerate(reserved_bookings):
+        # Get cage from booking
+        cage = svc.get_cage_for_booking(b)
+        guest = svc.get_guest_for_booking(b)
+        print(f' {idx + 1}. Your {cage.name} Cage has been booked by {guest.name} from {b.check_in_date} for '
+              f'{(b.check_out_date - b.check_in_date).days} days.')
+
+    # print(" -------- NOT IMPLEMENTED -------- ")
 
 
 def exit_app():

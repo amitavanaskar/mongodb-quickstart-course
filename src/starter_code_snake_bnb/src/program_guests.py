@@ -67,7 +67,7 @@ def add_a_snake():
         hosts.error_msg("You need to login to add a snake.")
         hosts.log_into_account()
 
-    # TODO: Get snake info from user
+    # Done: Get snake info from user
     name = input('What is the name of your snake? ')
     if not name:
         hosts.error_msg('INPUT MISSING - Please input the name of your snake. ')
@@ -205,7 +205,8 @@ def book_a_cage():
     cage_number = input('Enter the cage (number) you want to book: ')
     if not cage_number:
         hosts.error_msg('INPUT MISSING - You have not entered a cage number.')
-        choose_default = input(f'{available_cages[0].name} is a perfect fit. [C]hoose it / [S]earch again / E[x]it. ').lower()
+        choose_default = input(f'{available_cages[0].name} is a perfect fit. [C]hoose it / [S]earch again / E[x]it. ')\
+            .lower()
         if choose_default == 'c':
             cage_number = 1
         elif choose_default == 's':
@@ -234,7 +235,14 @@ def view_bookings():
         hosts.error_msg('You need to login to view your bookings')
         hosts.log_into_account()
 
-    # TODO: List booking info along with snake info
+    # Done: List booking info along with snake info
     bookings = svc.get_bookings_for_user(state.active_account)
+    print(f'You have {len(bookings)} bookings -')
+    for idx, b in enumerate(bookings):
+        cage = svc.get_cage_for_booking(b)
+        snake = svc.get_snake_for_booking(b)
+        print(f" {idx + 1}. Snake {snake.name} is booked at {cage.name} at {b.check_in_date} for "
+              f"{(b.check_out_date - b.check_in_date).days} days - "
+              f"Price: {(cage.price * ((b.check_out_date - b.check_in_date).days))}")
 
     # print(" -------- NOT IMPLEMENTED -------- ")

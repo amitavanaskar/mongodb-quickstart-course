@@ -93,9 +93,9 @@ def find_snakes_for_user(account: Owner) -> List[Snake]:
 
 
 def get_available_cages(checkin: datetime.datetime, checkout: datetime.datetime, snake: Snake) -> List[Cage]:
-    # TODO: Minimum size of cage is snake length / 4
-    # TODO: Find all the cages that have bookings but are not booked in the specified time block
-    # TODO: If venomous, only allowed. If not, all
+    # Done: Minimum size of cage is snake length / 4
+    # Done: Find all the cages that have bookings but are not booked in the specified time block
+    # Done: If venomous, only allowed. If not, all
     min_size = snake.length / 4
     query = Cage.objects() \
         .filter(square_meters__gte=min_size) \
@@ -193,7 +193,38 @@ def get_bookings_for_user(account: Owner) -> List[Booking]:
     bookings = []
     for cage in booked_cages:
         for booking in cage.bookings:
-            if cage.booking.guest_owner_id == account.id:
+            if booking.guest_owner_id == account.id:
                 bookings.append(booking)
     return bookings
-    # TODO: Test above
+    # Done: Test above
+
+
+def get_cage_for_booking(booking: Booking) -> Cage:
+    cage = Cage.objects(). \
+        filter(bookings__guest_owner_id=booking.guest_owner_id). \
+        filter(bookings__guest_snake_id=booking.guest_snake_id). \
+        filter(bookings__booked_date=booking.booked_date).first()
+    return cage
+
+
+def get_snake_for_booking(booking: Booking) -> Snake:
+    snake = Snake.objects().filter(id=booking.guest_snake_id).first()
+    return snake
+
+
+def get_bookings_for_host(account: Owner) -> List[Booking]:
+    cages = find_cages_for_user(account=account)
+    reserved_bookings = []
+    c: Cage
+    for c in cages:
+        b: Booking
+        for b in c.bookings:
+            if b.booked_date and not b.cancel_flag:
+                reserved_bookings.append(b)
+    return reserved_bookings
+
+
+def get_guest_for_booking(booking: Booking) -> Owner:
+    guest_id = booking.guest_owner_id
+    account = Owner.objects(id=guest_id).first()
+    return account
