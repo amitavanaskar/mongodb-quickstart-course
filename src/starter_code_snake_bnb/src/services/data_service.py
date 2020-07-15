@@ -228,3 +228,18 @@ def get_guest_for_booking(booking: Booking) -> Owner:
     guest_id = booking.guest_owner_id
     account = Owner.objects(id=guest_id).first()
     return account
+
+
+def find_alternate_booking(snake: Snake, checkin: datetime.datetime, checkout: datetime.datetime) -> Booking:
+    # snake = Snake.objects(id=snake.id)
+    alternate_booking = None
+    query = Cage.objects().filter(bookings__guest_snake_id=snake.id)
+    booked_cages_for_snake = list(query)
+    for cage in booked_cages_for_snake:
+        for b in cage.bookings:
+            if b.guest_snake_id == snake.id and \
+                    ((checkout < b.check_out_date and checkout > b.check_in_date) or
+                     (checkin > b.check_in_date and checkin < b.check_out_date)):
+                alternate_booking = b
+                break
+    return alternate_booking

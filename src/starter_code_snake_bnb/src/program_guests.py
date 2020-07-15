@@ -112,8 +112,7 @@ def view_your_snakes(suppress_header=False):
         if want_add_snake:
             add_a_snake()
             view_your_snakes()
-        else:
-            return
+        return
     for idx, s in enumerate(snakes):
         print(f'    {idx + 1}. {s.name} is a {s.length} meters long {s.species}. Venomous - {s.is_venomous}')
 
@@ -160,8 +159,7 @@ def book_a_cage():
         want_today_checkin = input("Do you want to check for availability today [y / n]? ").lower().startswith('y')
         if want_today_checkin:
             checkin = datetime.datetime.now()
-        else:
-            return
+        return
     checkin = parser.parse(start_date_input)
 
     end_date_input = input('Enter check-out date [yyyy-mm-dd]: ')
@@ -171,13 +169,25 @@ def book_a_cage():
                                      "Do you want to check-out on the same day [y / n]? ").lower().startswith('y')
         if want_oneday_checkout:
             checkout = checkin + datetime.timedelta(days=1)
-        else:
-            return
+        return
     checkout = parser.parse(end_date_input)
 
     if checkout <= checkin:
         hosts.error_msg('INCORRECT INPUT - Check-in date must be before checkout date.')
         book_a_cage()
+
+    # TODO: Check if the snake is booked in any other cage for the duration
+    alternate_booking = svc.find_alternate_booking(selected_snake, checkin, checkout)
+    if alternate_booking:
+        alt_booked_cage = svc.get_cage_for_booking(alternate_booking)
+        hosts.error_msg(f'Snake {selected_snake.name} is already booked in cage {alt_booked_cage.name} from '
+                        f'{alternate_booking.check_in_date} to {alternate_booking.check_out_date}.\n'
+                        f'View your current bookings below -')
+        view_bookings()
+        input_again = input('Do you want to make another booking [y / n]? ').lower().startswith('y')
+        if input_again:
+            book_a_cage()
+        return
 
     # Done: Find cages available across date range
     available_cages = svc.get_available_cages(checkin, checkout, selected_snake)
@@ -198,8 +208,7 @@ def book_a_cage():
         try_different_dates = input('Do you wish to modify the search dates [y / n]? ').lower().startswith('y')
         if try_different_dates:
             book_a_cage()
-        else:
-            return
+        return
 
     # Done: Let user select cage to book.
     cage_number = input('Enter the cage (number) you want to book: ')
@@ -211,8 +220,7 @@ def book_a_cage():
             cage_number = 1
         elif choose_default == 's':
             book_a_cage()
-        else:
-            return
+        return
 
     try:
         cage_number = int(cage_number)
