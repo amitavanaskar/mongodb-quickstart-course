@@ -1,5 +1,6 @@
 import mongoengine
 
+
 def global_init():
     mongoengine.register_connection(alias='core', name='snake_bnb')
     # We can have multiple connections, multiple databases or multiple database servers too registered in an alias.

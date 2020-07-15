@@ -214,7 +214,7 @@ def book_a_cage():
     cage_number = input('Enter the cage (number) you want to book: ')
     if not cage_number:
         hosts.error_msg('INPUT MISSING - You have not entered a cage number.')
-        choose_default = input(f'{available_cages[0].name} is a perfect fit. [C]hoose it / [S]earch again / E[x]it. ')\
+        choose_default = input(f'{available_cages[0].name} is a perfect fit. [C]hoose it / [S]earch again / E[x]it. ') \
             .lower()
         if choose_default == 'c':
             cage_number = 1
@@ -251,6 +251,6 @@ def view_bookings():
         snake = svc.get_snake_for_booking(b)
         print(f" {idx + 1}. Snake {snake.name} is booked at {cage.name} at {b.check_in_date} for "
               f"{(b.check_out_date - b.check_in_date).days} days - "
-              f"Price: {(cage.price * ((b.check_out_date - b.check_in_date).days))}")
+              f"Price: {(cage.price * (b.check_out_date - b.check_in_date).days)}")
 
     # print(" -------- NOT IMPLEMENTED -------- ")

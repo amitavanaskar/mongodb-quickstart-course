@@ -69,12 +69,12 @@ def create_account():
 
     if old_account:
         error_msg(f"ERROR: Account with email {email} already exists.")
-        if name.lower() == old_account.name.lower():    # If input name matches existing account name, login
+        if name.lower() == old_account.name.lower():  # If input name matches existing account name, login
             state.active_account = old_account
             success_msg(f"Hi {state.active_account.name}! You are logged in successfully with email : {email}")
         else:
             return
-    else:   # Done : Create account, set as logged in.
+    else:  # Done : Create account, set as logged in.
         state.active_account = svc.create_account(name, email)
         success_msg(f"Created new account for {name} and {email} with id {state.active_account.id}.")
 
@@ -178,7 +178,7 @@ def list_cages(suppress_header=False):
             list_cages()
         return
     # List out cages
-    for idx, c in enumerate(cages):     # Enumerate for easy selection to update availability
+    for idx, c in enumerate(cages):  # Enumerate for easy selection to update availability
         print(f' {idx + 1}. {c.name} is {c.square_meters} square meters')
         for b in c.bookings:
             print('    * Booking Availability: {}, {} Days, Booked? {}'.format(
@@ -225,7 +225,7 @@ def update_availability():
     if not days:
         error_msg(f"INPUT MISSING - Number of days {selected_cage.name} is available is missing.")
         book_month = input(f"    > Max Duration possible by default is a month\n"
-                           f"    > Do you want to mark {selected_cage.name} available for a month [y / n]? ").\
+                           f"    > Do you want to mark {selected_cage.name} available for a month [y / n]? "). \
             lower().startswith('y')
         if book_month:
             success_msg(f"{selected_cage.name} will be available for 30 days.")

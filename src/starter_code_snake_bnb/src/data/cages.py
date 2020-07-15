@@ -4,7 +4,7 @@ import datetime
 from data.bookings import Booking
 
 
-class Cage(mongoengine.Document):   # This tells mongoengine that this is a top level document
+class Cage(mongoengine.Document):  # This tells mongoengine that this is a top level document
     registered_date = mongoengine.DateTimeField(default=datetime.datetime.now)
 
     name = mongoengine.StringField(required=True)

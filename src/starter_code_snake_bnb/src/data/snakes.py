@@ -2,7 +2,7 @@ import mongoengine
 import datetime
 
 
-class Snake(mongoengine.Document): # Tells mongoengine that owners is a top level document
+class Snake(mongoengine.Document):  # Tells mongoengine that owners is a top level document
     registered_date = mongoengine.DateTimeField(default=datetime.datetime.now)
     # We are passing the function, not the value of now. Adding parenthesis in now() would pass the time when the
     # program started.
