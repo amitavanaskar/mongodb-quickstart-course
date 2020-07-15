@@ -11,12 +11,6 @@ class Booking(mongoengine.EmbeddedDocument):
     check_out_date = mongoengine.DateTimeField(required=True)
 
     review = mongoengine.StringField()
-    rating = mongoengine.IntField(default=0)    # Can ask to rate from 1-5, filter out the zeroes for avg (not rated)
+    rating = mongoengine.IntField(default=0)  # Can ask to rate from 1-5, filter out the zeroes for avg (not rated)
 
-    cancel_flag = mongoengine.BooleanField(default=False)   # Used to cancel a booking availability
-
-    # meta = {
-    #     'db_alias': 'core',
-    #     'collection': 'cages'
-    # }
-# Meta details not needed as this is an embedded document.
+    cancel_flag = mongoengine.BooleanField(default=False)  # Used to cancel a booking availability
